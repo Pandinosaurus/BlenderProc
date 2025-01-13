@@ -45,7 +45,7 @@ all_wood_materials = bproc.filter.by_attr(all_materials, "name", "wood.*|laminat
 # now change the used values
 for material in all_wood_materials:
     material.set_principled_shader_value("Roughness", np.random.uniform(0.05, 0.5))
-    material.set_principled_shader_value("Specular", np.random.uniform(0.5, 1.0))
+    material.set_principled_shader_value("Specular IOR Level", np.random.uniform(0.5, 1.0))
     material.set_displacement_from_principled_shader_value("Base Color", np.random.uniform(0.001, 0.15))
 
 all_stone_materials = bproc.filter.by_attr(all_materials, "name", "tile.*|brick.*|stone.*", regex=True)
@@ -53,14 +53,14 @@ all_stone_materials = bproc.filter.by_attr(all_materials, "name", "tile.*|brick.
 # now change the used values
 for material in all_stone_materials:
     material.set_principled_shader_value("Roughness", np.random.uniform(0.0, 0.2))
-    material.set_principled_shader_value("Specular", np.random.uniform(0.9, 1.0))
+    material.set_principled_shader_value("Specular IOR Level", np.random.uniform(0.9, 1.0))
 
 all_floor_materials = bproc.filter.by_attr(all_materials, "name", "carpet.*|textile.*", regex=True)
 
 # now change the used values
 for material in all_floor_materials:
     material.set_principled_shader_value("Roughness", np.random.uniform(0.5, 1.0))
-    material.set_principled_shader_value("Specular", np.random.uniform(0.1, 0.3))
+    material.set_principled_shader_value("Specular IOR Level", np.random.uniform(0.1, 0.3))
 
 # set the light bounces
 bproc.renderer.set_light_bounces(diffuse_bounces=200, glossy_bounces=200, max_bounces=200, transmission_bounces=200, transparent_max_bounces=200)
@@ -68,15 +68,12 @@ bproc.renderer.set_light_bounces(diffuse_bounces=200, glossy_bounces=200, max_bo
 # activate normal and depth rendering
 bproc.renderer.enable_normals_output()
 bproc.renderer.enable_depth_output(activate_antialiasing=False)
-# set the amount of samples, which should be used for the color rendering
-bproc.renderer.set_samples(350)
+bproc.renderer.enable_segmentation_output(map_by=["category_id"])
 
 bproc.material.add_alpha_channel_to_textures(blurry_edges=True)
 
 # render the whole pipeline
 data = bproc.renderer.render()
-
-data.update(bproc.renderer.render_segmap(map_by="class", use_alpha_channel=True))
 
 # write the data to a .hdf5 container
 bproc.writer.write_hdf5(args.output_dir, data)

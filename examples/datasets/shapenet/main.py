@@ -9,7 +9,7 @@ args = parser.parse_args()
 bproc.init()
 
 # load the ShapeNet object into the scene
-shapenet_obj = bproc.loader.load_shapenet(args.shapenet_path, used_synset_id="02691156", used_source_id="10155655850468db78d106ce0a280f87")
+shapenet_obj = bproc.loader.load_shapenet(args.shapenet_path, used_synset_id="02691156", used_source_id="10155655850468db78d106ce0a280f87", validate_meshes=True)
 
 # define a light and set its location and energy level
 light = bproc.types.Light()
@@ -30,8 +30,6 @@ for i in range(5):
 # activate normal and depth rendering
 bproc.renderer.enable_normals_output()
 bproc.renderer.enable_depth_output(activate_antialiasing=False)
-# set the amount of samples, which should be used for the color rendering
-bproc.renderer.set_samples(350)
 
 # render the whole pipeline
 data = bproc.renderer.render()

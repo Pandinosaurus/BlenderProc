@@ -6,7 +6,7 @@ import numpy as np
 
 from blenderproc.python.tests.SilentMode import SilentMode
 from blenderproc.python.tests.TestsPathManager import test_path_manager
-from blenderproc.python.utility.Utility import Utility
+from blenderproc.python.utility.Utility import UndoAfterExecution
 
 
 class UnitTestCheckUtility(unittest.TestCase):
@@ -15,13 +15,13 @@ class UnitTestCheckUtility(unittest.TestCase):
         """ Test if the blender_data objects are still valid after an undo execution is done. 
         """
         with SilentMode():
-            bproc.init()
+            bproc.clean_up(True)
             objs = bproc.loader.load_obj(os.path.join(test_path_manager.example_resources, "scene.obj"))
 
             for obj in objs:
                 obj.set_cp("test", 0)
 
-            with Utility.UndoAfterExecution():
+            with UndoAfterExecution():
                 for obj in objs:
                     obj.set_cp("test", 1)
 

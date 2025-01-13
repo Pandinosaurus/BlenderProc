@@ -1,10 +1,14 @@
 __pycache__
+dist/
 */__pycache__
+blenderproc.egg-info/
+build/
 blender
 .idea/
 .vscode/
 output/
 debug/
+resources/AMASS
 resources/cctextures*
 resources/scenenet/*zip
 resources/scenenet/SceneNetData
@@ -26,3 +30,4 @@ docs/source/*rst
 docs/source/images/
 docs/source/examples/
 docs/source/*md
+blenderproc_resources/

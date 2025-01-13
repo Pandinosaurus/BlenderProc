@@ -1,8 +1,10 @@
-import bpy
+""" This script allows the use of the debug mode in BlenderProc. """
+
 import sys
-from pathlib import Path
-from bl_ui.space_text import TEXT_MT_editor_menus
 import os
+
+import bpy
+from bl_ui.space_text import TEXT_MT_editor_menus
 
 # Extract given arguments
 argv = sys.argv[sys.argv.index("--") + 1:]
@@ -11,35 +13,24 @@ argv = sys.argv[sys.argv.index("--") + 1:]
 bpy.context.window.workspace = bpy.data.workspaces["Scripting"]
 bpy.context.view_layer.update()
 
-# Load text to put into scripting tool
-is_config = not argv[0].endswith(".py")
-if is_config:
-    # Create a new temporary script based on debug.py
-    text = bpy.data.texts.new("debug")
-    with open(Path(__file__).with_name("debug.py")) as f:
-        script_text = f.read()
-        # Replace placeholders
-        script_text = script_text.replace("###CONFIG_PATH###", argv[0])
-        script_text = script_text.replace("[\"###CONFIG_ARGS###\"]", str(argv[2:]))
-        # Put into blender text object
-        text.from_string(script_text)
-    # Set cursor to the beginning
-    text.cursor_set(0)
-    # Set filepath such that it can be used inside debug.py, while not overwriting it
-    text.filepath = str(Path(__file__).with_name("debug_temp.py").absolute())
-else:
-    # Just load python script into blender text object
-    text = bpy.data.texts.load(argv[0])
+# Just load python script into blender text object
+text = bpy.data.texts.load(os.path.abspath(argv[0]))
 
 
 # Declare operator that runs the blender proc script
 class RunBlenderProcOperator(bpy.types.Operator):
+    """ This operator adds the Run BlenderProc button to the GUI """
+
     bl_idname = "wm.run_blenderproc"
     bl_label = "Run BlenderProc"
-    bl_description = "This operator runs the loaded BlenderProc script and also makes sure to unload all modules before starting."
+    bl_description = "This operator runs the loaded BlenderProc script and also makes sure to unload all " \
+                     "modules before starting."
     bl_options = {"REGISTER"}
 
-    def execute(self, context):
+    def execute(self, _):
+        """
+        Execute the button -> running BlenderProc
+        """
         # Delete all loaded models inside src/, as they are cached inside blender
         for module in list(sys.modules.keys()):
             if module.startswith("blenderproc") and module not in ["blenderproc.python.utility.SetupUtility"]:
@@ -51,24 +42,31 @@ class RunBlenderProcOperator(bpy.types.Operator):
             sys.path.append(import_path)
 
         # Run the script
-        bpy.ops.text.run_script()
+        try:
+            bpy.ops.text.run_script()
+        except RuntimeError:
+            # Skip irrelevant error messages (The relevant stacktrace+error has already been printed at this point)
+            pass
         return {"FINISHED"}
 
+
 bpy.utils.register_class(RunBlenderProcOperator)
+
 
 # Declare function for drawing the header toolbar of the scripting area
 # Mostly copied from blenders script: scripts/startup/bl_ui/space_text.py
 def draw(self, context):
+    """ Draws the newly defined Run BlenderProc button """
     layout = self.layout
 
     st = context.space_data
-    text = st.text
+    context_text = st.text
     is_syntax_highlight_supported = st.is_syntax_highlight_supported()
     layout.template_header()
 
     TEXT_MT_editor_menus.draw_collapsible(context, layout)
 
-    if text and text.is_modified:
+    if context_text and context_text.is_modified:
         row = layout.row(align=True)
         row.alert = True
         row.operator("text.resolve_conflict", text="", icon='HELP')
@@ -79,15 +77,16 @@ def draw(self, context):
     row.template_ID(st, "text", new="text.new",
                     unlink="text.unlink", open="text.open")
 
-    if text:
-        is_osl = text.name.endswith((".osl", ".osl"))
+    if context_text:
+        is_osl = context_text.name.endswith((".osl", ".osl"))
         if is_osl:
             row.operator("node.shader_script_update",
                          text="", icon='FILE_REFRESH')
         else:
             row = layout.row()
             row.active = is_syntax_highlight_supported
-            # The following line has changed compared to the orignal code, it starts our operator instead of text.run_script
+            # The following line has changed compared to the orignal code,
+            # it starts our operator instead of text.run_script
             row.operator("wm.run_blenderproc", text="Run BlenderProc")
 
     layout.separator_spacer()
@@ -99,6 +98,7 @@ def draw(self, context):
     syntax = row.row(align=True)
     syntax.active = is_syntax_highlight_supported
     syntax.prop(st, "show_syntax_highlight", text="")
+
 
 # Set our draw function as the default draw function for text area headers
 bpy.types.TEXT_HT_header.draw = draw

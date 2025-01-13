@@ -6,7 +6,7 @@
 
 The focus of this example is the `loader.SceneNetLoader`, which can be used to load objects from the SceneNet dataset.
 
-We provide a script to download the `.obj` files, see the [scripts](../../scripts/) folder, the texture files can be downloaded [here](http://tinyurl.com/zpc9ppb).
+We provide a script to download the `.obj` files, see the [scripts](../../scripts/) folder, the texture files can be downloaded [here](https://drive.google.com/file/d/0B_CLZMBI0zcuQ3ZMVnp1RUkyOFk/view?usp=sharing&resourcekey=0-w8JN2r3WQ48eZltxQ-fSwA).
 
 Both are needed to use this dataset properly.
 
@@ -60,7 +60,7 @@ By selecting random texture and putting them in this `unknown_texture_folder`, w
 ```python
 # Make all lamp objects emit light
 lamps = bproc.filter.by_attr(objs, "name", ".*[l|L]amp.*", regex=True)
-bproc.lighting.light_surface(lamps, emission_strength=15, keep_using_base_color=True)
+bproc.lighting.light_surface(lamps, emission_strength=15)
 ```
 
 The first function call will make the lamps in the scene emit light, while using the assigned material textures. 

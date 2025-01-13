@@ -69,12 +69,10 @@ while tries < 10000 and poses < 10:
 
 # Also render normals
 bproc.renderer.enable_normals_output()
-# set the sample amount to 350
-bproc.renderer.set_samples(350)
+bproc.renderer.enable_segmentation_output(map_by=["category_id"])
 
 # render the whole pipeline
 data = bproc.renderer.render()
-data.update(bproc.renderer.render_segmap(map_by="class"))
 
 # write the data to a .hdf5 container
 bproc.writer.write_hdf5(args.output_dir, data)

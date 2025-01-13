@@ -4,12 +4,13 @@
 
 If don't have any data yet, BlenderProc offers download functionality for many datasets and freely available assets via the `blenderproc` CLI:
 
-* `blendeproc download_blenderkit`: Downloads materials and models from blenderkit
-* `blendeproc download_cc_textures`: Downloads textures from cc0textures.com.
-* `blendeproc download_haven`: Downloads HDRIs, Textures and Models from polyhaven.com.
-* `blendeproc download_ikea`: Downloads the IKEA dataset. **(At the moment this dataset is not availabe!)**
-* `blendeproc download_pix3d`: Downloads the Pix3D dataset.
-* `blendeproc download_scenenet`: Downloads the scenenet dataset.
+* `blenderproc download blenderkit <output_dir>`: Downloads materials and models from blenderkit
+* `blenderproc download cc_textures <output_dir>`: Downloads textures from cc0textures.com.
+* `blenderproc download haven <output_dir>`: Downloads HDRIs, Textures and Models from polyhaven.com.
+* `blenderproc download ikea <output_dir>`: Downloads the IKEA dataset. **(At the moment this dataset is not availabe! Use pix3d instead, as ikea is a subset of pix3D)**
+* `blenderproc download pix3d <output_dir>`: Downloads the Pix3D dataset.
+* `blenderproc download scenenet <output_dir>`: Downloads the scenenet dataset.
+* `blenderproc download matterport3d <output_dir>`: Downloads the Matterport3D dataset.
 
 ## Loading
 
@@ -28,7 +29,9 @@ objs = bproc.loader.load_obj("mymesh.obj")
 ### Dataset-specific loaders:
 
 * `bproc.loader.load_AMASS`: Loads objects from the AMASS Dataset.
-* `bproc.loader.load_bop`: Loads the 3D models of any BOP dataset and allows replicating BOP scenes.
+* `bproc.loader.load_bop_objs`: Loads the 3D models of any BOP dataset and allows replicating BOP scenes.
+* `bproc.loader.load_bop_scene`: Loads any real BOP scenes using 3D models.
+* `bproc.loader.load_bop_intrinsics`: Loads intrinsics of specified BOP dataset.
 * `bproc.loader.load_front3d`: Loads 3D-Front scenes.
 * `bproc.loader.load_ikea`: Loads objects from the IKEA dataset.
 * `bproc.loader.load_pix3d`: Loads Pix3D objects.
@@ -36,6 +39,7 @@ objs = bproc.loader.load_obj("mymesh.obj")
 * `bproc.loader.load_scenenet`: Loads SceneNet scenes.
 * `bproc.loader.load_shapenet`: Loads objects from the ShapeNet dataset.
 * `bproc.loader.load_suncg`: Loads SUNCG scenes.
+* `bproc.loader.load_matterport3d`: Loads a Matterport3D scene.
 
 ## Manipulating objects
 

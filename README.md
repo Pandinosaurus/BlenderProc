@@ -10,10 +10,11 @@
 
 A procedural Blender pipeline for photorealistic rendering.
 
-[Documentation](https://dlr-rm.github.io/BlenderProc) | [Tutorials](#tutorials) | [Examples](#examples) | [ArXiv paper](https://arxiv.org/abs/1911.01911) | [Workshop paper](https://sim2real.github.io/assets/papers/2020/denninger.pdf)
+[Documentation](https://dlr-rm.github.io/BlenderProc) | [Tutorials](#tutorials) | [Examples](#examples) | [ArXiv paper](https://arxiv.org/abs/1911.01911) | [Workshop paper](https://sim2real.github.io/assets/papers/2020/denninger.pdf) | [JOSS article](https://joss.theoj.org/papers/10.21105/joss.04901)
+
 ## Features
 
-* Loading: `*.obj`, `*.ply`, `*.blend`, BOP, ShapeNet, Haven, 3D-FRONT, etc.
+* Loading: `*.obj`, `*.ply`, `*.blend`, `*.fbx`, BOP, ShapeNet, Haven, 3D-FRONT, etc.
 * Objects: Set or sample object poses, apply physics and collision checking.
 * Materials: Set or sample physically-based materials and textures
 * Lighting: Set or sample lights, automatic lighting of 3D-FRONT scenes.
@@ -32,9 +33,9 @@ The simplest way to install blenderproc is via pip:
 pip install blenderproc
 ```
 
-### Git clone
+### Via git
 
-If you need to make changes to blenderproc or you want to make use of the most recent version on the main-branch, clone the repository:
+Alternatively, if you need to make changes to blenderproc or you want to make use of the most recent version on the main-branch, clone the repository:
 
 ```bash
 git clone https://github.com/DLR-RM/BlenderProc
@@ -57,12 +58,18 @@ blenderproc run <your_python_script>
 ```
 
 In general, one run of your script first loads or constructs a 3D scene, then sets some camera poses inside this scene and renders different types of images (RGB, distance, semantic segmentation, etc.) for each of those camera poses.
-In the usual case, to create a big and diverse dataset, you therefore run your script multiple times, each time producing 5-20 images.
-With a little more experience, it is also possible to render multiple times in one script call, read [here](docs/tutorials/key_frames.md#render-multiple-times) how this is done.
+Usually, you will run your script multiple times, each time producing a new scene and rendering e.g. 5-20 images from it.
+With a little more experience, it is also possible to change scenes during a single script call, read [here](docs/tutorials/key_frames.md#render-multiple-times) how this is done.
 
 ## Quickstart
 
-Create a python script `quickstart.py` with the following content:
+You can test your BlenderProc pip installation by running
+
+```bash
+blenderproc quickstart
+```
+
+This is an alias to `blenderproc run quickstart.py` where `quickstart.py` is:
 
 ```python
 import blenderproc as bproc
@@ -89,13 +96,7 @@ data = bproc.renderer.render()
 bproc.writer.write_hdf5("output/", data)
 ```
 
-Now run the script via:
-
-```bash
-blenderproc run quickstart.py
-```
-
-BlenderProc now creates the specified scene and renders the image into `output/0.hdf5`.
+BlenderProc creates the specified scene and renders the image into `output/0.hdf5`.
 To visualize that image, simply call:
 
 ```bash
@@ -104,13 +105,14 @@ blenderproc vis hdf5 output/0.hdf5
 
 Thats it! You rendered your first image with BlenderProc!
 
-### Debugging
+### Debugging in the Blender GUI
 
 To understand what is actually going on, BlenderProc has the great feature of visualizing everything inside the blender UI.
 To do so, simply call your script with the `debug` instead of `run` subcommand:
 ```bash
 blenderproc debug quickstart.py
 ```
+*Make sure that `quickstart.py` actually exists in your working directory.*
 
 Now the Blender UI opens up, the scripting tab is selected and the correct script is loaded.
 To start the BlenderProc pipeline, one now just has to press `Run BlenderProc` (see red circle in image).
@@ -121,6 +123,67 @@ As in the normal mode, print statements are still printed to the terminal.
 </p>
 
 The pipeline can be run multiple times, as in the beginning of each run the scene is cleared.
+
+### Breakpoint-Debugging in IDEs
+
+As blenderproc runs in blenders separate python environment, debugging your blenderproc script cannot be done in the same way as with any other python script.
+Therefore, remote debugging is necessary, which is explained for vscode and PyCharm in the following:
+
+#### Debugging with vscode
+
+First, install the `debugpy` package in blenders python environment.
+
+```
+blenderproc pip install debugpy
+```
+
+Now add the following configuration to your vscode [launch.json](https://code.visualstudio.com/docs/python/debugging#_initialize-configurations).
+
+```json
+{                        
+    "name": "Attach",
+    "type": "python",
+    "request": "attach",
+    "connect": {
+        "host": "localhost",
+        "port": 5678
+    }
+}
+```
+
+Finally, add the following lines to the top (after the imports) of your blenderproc script which you want to debug.
+
+```python
+import debugpy
+debugpy.listen(5678)
+debugpy.wait_for_client()
+```
+
+Now run your blenderproc script as usual via the CLI and then start the added "Attach" configuration in vscode.
+You are now able to add breakpoints and go through the execution step by step.
+
+#### Debugging with PyCharm Professional
+
+In Pycharm, go to `Edit configurations...` and create a [new configuration](https://www.jetbrains.com/help/pycharm/remote-debugging-with-product.html#remote-debug-config) based on `Python Debug Server`.
+The configuration will show you, specifically for your version, which pip package to install and which code to add into the script.
+The following assumes Pycharm 2021.3:
+
+First, install the `pydevd-pycharm` package in blenders python environment.
+
+```
+blenderproc pip install pydevd-pycharm~=212.5457.59
+```
+
+Now, add the following code to the top (after the imports) of your blenderproc script which you want to debug.
+
+```python
+import pydevd_pycharm
+pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
+```
+
+Then, first run your `Python Debug Server` configuration in PyCharm and then run your blenderproc script as usual via the CLI.
+PyCharm should then go in debug mode, blocking the next code line.
+You are now able to add breakpoints and go through the execution step by step.
 
 ## What to do next?
 
@@ -166,12 +229,18 @@ See our [change log](change_log.md).
 If you use BlenderProc in a research project, please cite as follows:
 
 ```
-@article{denninger2019blenderproc,
-  title={BlenderProc},
-  author={Denninger, Maximilian and Sundermeyer, Martin and Winkelbauer, Dominik and Zidan, Youssef and Olefir, Dmitry and Elbadrawy, Mohamad and Lodhi, Ahsan and Katam, Harinandan},
-  journal={arXiv preprint arXiv:1911.01911},
-  year={2019}
-}
+@article{Denninger2023, 
+    doi = {10.21105/joss.04901},
+    url = {https://doi.org/10.21105/joss.04901},
+    year = {2023},
+    publisher = {The Open Journal}, 
+    volume = {8},
+    number = {82},
+    pages = {4901}, 
+    author = {Maximilian Denninger and Dominik Winkelbauer and Martin Sundermeyer and Wout Boerdijk and Markus Knauer and Klaus H. Strobl and Matthias Humt and Rudolph Triebel},
+    title = {BlenderProc2: A Procedural Pipeline for Photorealistic Rendering}, 
+    journal = {Journal of Open Source Software}
+} 
 ```
 
 ---

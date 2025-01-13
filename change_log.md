@@ -1,14 +1,162 @@
-
 # Planned Features
 
-- Adding a complete python API and phasing out the `.yaml` files (Goal for 2.0.0)
-- Add support for all YCB objects (not just BOP)
 - Add support for more object datasets (ideas are welcomed, just open an issue with a dataset you want to see integrated)
-- Improve the documentation 
+- Support non-rigid physics simulation
+- Improve performance
+- Deprecate Global Storage
 
 # Version History
 
-## Version 2.1.0 17th Novemeber 2021
+## Version 2.8.0 22th October 2024
+
+- upgrades to blender 4.2.1 (#1136, thanks a lot to @Griperis who did the main work in this PR)
+- updates default pip package-versions used inside blenderproc (#1110)
+- adds support for loading collections from .blend files with intact hierarchies (#1149, thanks @johan-apes)
+- adds support of quad faces to mesh_as_trimesh() function (#1127, thanks @MartinSmeyer)
+- fixes memory leak in bvh tree creation (#1098, thanks @rasmushaugaard)
+- fixes bproc.clean_up() to not reset render properties anymore (#1115)
+- fixes CLI help text (#1125, thanks @Griperis)
+- make sure object rotation is set in XYZ-Euler coordinates (#1142, thanks @tomole444)
+
+## Version 2.7.1 16th April 2024
+
+- new camera projection helper methods are available: `bproc.camera.depth_via_raytracing()`, `bproc.camera.pointcloud_from_depth()`, `bproc.camera.project_points()`, `bproc.camera.unproject_points()` (#1045, #1075)
+- .blend loader now also supports hair_curves (#1052, thanks @sagoyal2)
+- adds .usd loader (#1043, thanks @freLorbeer)
+- fixes memory leak in bop writer (#1086, thanks @matteomastrogiuseppe)
+- fixes removal of scene properties (#1055)
+- fixes incorrect warnings regarding hidden objects in bop writer (@1058, thanks @saprrow)
+- fixes linking objects when duplicating object hierarchy (@1081, thanks @AndreyYashkin)
+
+
+## Version 2.7.0 26th January 2024
+
+- upgrades to blender 3.5.1 (#788)
+- adds helper methods for easy 3D-2D projection/unprojection, including `bproc.camera.depth_via_raytracing()`, `bproc.camera.pointcloud_from_depth()`, `bproc.camera.project_points()`, `bproc.camera.unproject_points()`, see also [point_cloud](https://github.com/DLR-RM/BlenderProc/tree/main/examples/advanced/point_clouds) example (#1045)
+- removes support for obsolete .yaml configuration files (#962)
+- speeds up bop writer for large number of objects - for 300 objects, the bop writer execution time reduces from 60s to 12s with 8 cores (#996)
+- adds warning if hidden objects are given to bop writer (#998)
+- skip transparent cc materials per default (#1004)
+- rework of `duplicate()`: allows linking and keeps parent relative transformation matrix (#1012, thanks @AndreyYashkin)
+- moves `hide()` and `is_hidden()` to Entity class (#1015, thanks @AndreyYashkin)
+- fixes optical flow output key being overwritten by RGB (#963)
+- fixes `--custom-blender-path` on windows (#972)
+- adapts downloading cc_textures to new naming scheme (#976, #993)
+- fixes issue in light projector (#995, thanks @beekama)
+- fixes skipping annotation indices when appending coco annotations (#1024)
+- fixes frame offset in rendering progress bar (#1038, thanks @burcam)
+
+## Version 2.6.2 6th December 2023
+
+- Fixes blender download 
+
+## Version 2.6.1 26th August 2023
+
+- Fixes pyrender usage on windows, EGL / headless rendering is now only used on linux
+
+## Version 2.6.0 17th August 2023
+
+- BOP toolkit is now tightly integrated into the the BOP writer:
+  - Ground truth masks and coco annotations are now directly calculated when calling the BOP writer
+  - Instead of using vispy for renderings the masks, we switched to pyrender which speeds up the process a lot
+- rendering/physics log is now hidded per default and instead a pretty progress bar is shown
+- upgrades to blender 3.3.1
+- its now possible to render segmentation images in stereo mode
+- adds method to MeshObject to convert to trimesh
+- fixes rendering on cpu-only (thanks @muedavid)
+- adds support for loading .glb/.gltf meshes (thanks @woodbridge)
+- adds support for loading .fbx meshes (thanks @HectorAnadon)
+- allows setting rotation for hdri backgrounds (thanks @saprrow)
+- incorporate location changes to urdf local2world matrix calculations
+- allows setting brightness for hdri backgrounds 
+- `bproc.object.sample_poses_on_surface()` now hides objects which could not be placed instead of deleting them
+- removes duplicate categories and fixes segmentation id when writing scene_gt.json annotations in BOP writer (thanks @hansaskov)
+- `get_all_cps()` now returns a proper dictionary (thanks @andrewyguo)
+- replaces deprecated `np.bool` with bool (thanks @NnamdiN)
+- refactoring of haven download script to support multithreading (thanks @hansaskov)
+- fixes loading stl files in urdf files
+- loading a .ply objects automatically sets the materials to its vertex color if no texture file was found.
+- username is now retrieved in a more platform independent way (thanks @YouJiacheng)
+- coco annotations are now nicely formatted (thanks @andrewyguo)
+- object pose sampler now correctly sets rotation if mode on failer was set to `initial_pose`
+
+
+## Version 2.5.0 20th September 2022
+- segmentations are now done in the same call as any other render call, avoiding the loading of the objects for each pose
+- added the kinect azure noise model, allowing for the creation of more realistic depth images
+- added a spotlight intersection mode, which places a spotlight in the world without intersecting with the current camera frustum, while it focuses on the middle of the camera frustum, creating hard lighting situations
+- add an importer for the MatterPort3d dataset
+- the key of custom properties now can no longer have the same name as any attribute of the `blender_obj`. Custom properties do not need to start with `cp_` anymore
+- add a new paper designated for the journal of sensors
+- we now use pylint to clean up all code smells and add documentation to all functions
+- the bop loader now also supports the hope dataset
+- separate the init and clean up functions
+- it can now be specified which GPU to use for rendering, if multiple are available
+- rewrite the ambient CG download script, allowing resuming the download
+- turn of the cycle denoiser causing issues in certain settings
+- add a random walk feature, which allows simulating a camera shaking or POI drift
+- the duplicate and delete fcts now support duplicating all children as well, we added a `get_children` fct as well
+- renaming `get_rotation` to `get_rotation_euler` and adding functions for setting the rotation matrix
+- fix a bug in the move_origin_to_bottom_mean fct.
+
+## Version 2.4.1 22th July 2022
+- allow writing poses for robot links in the BopWriter
+- loading .obj files now uses the faster importer
+- fix a pip install bug
+- fix a bug in the LinkUtility of the URDF loader
+
+## Version 2.4.0 20th July 2022
+- add urdf support: 
+  - this enables the simulation of robotic arms with forward and inverse kinematics
+  - add an example to show of how this works
+- add a new face slicer option, making it easier to slice the top of a table away for placing objects on them
+- add a new example for sampling objects in 3D Front scenes
+- switch to vhacd version 4.X allowing for faster decompositions than before, speeding up the simulation
+- add an option to link blend files instead of loading them (faster, but objects can not be changed after linking)
+- add a new replica loader, loading semantic objects instead of just one mesh for the whole scene
+- add basic support for apple silicion (M1, M2), this might still mean that some packages have to be installed on their own afterwards
+- add return random material to the load haven material function, the function returns also now the full loaded list of materials
+- add new function to create a material based soley on a texture (Path or bpy.types.Image)
+- upgrade to blender 3.2.1 
+- reduce the memory demand of the semantic segmentation by fixing a small bug
+- fix a bug where the coco annotation writer wouldn't work if the frame_start is not zero
+- fix a bug where writing alpha images in the bop writer did not work
+- fix a bug where pip would reinstall packages all the time
+- fix a bug where on windows the pip path would be wrong
+
+## Version 2.3.0 22th March 2022
+- upgrade to blender 3.1.0 
+  - add support for Apple Silicon and GPU on Mac OS 12.3 
+- add new stereo image projector, making it easier to simulate SGM depth
+- add quickstart command `blenderproc quickstart`
+- add gif writer 
+- function to scale the UV texture coordinates of a `MeshObject`
+- `object.sample_poses()` now also supports a `mode_on_failure`, which allows to control where the object is placed if the sampling fails @marcelhohn 
+- improve error message for python 2.X
+- bug fixes:
+  - `set_origin()` doesn't change the cursor position anymore @marcelhohn
+  - `vis hdf5 --save` now also supports stereo images
+  - improve error message when rendering with no camera poses
+  - fixed a bug where the windows path was incorrect for blender @marcelhohn
+  - fixed a bug when the category name is an int during coco vis
+  - `load_haven_mat()` now loads more materials, not all materials have been used before @Victorlouisdg
+
+## Version 2.2.0 17th December 2021
+- switch blender version to 3.0.0 instead of 2.93.0 
+  - we now rely on Cycles X, making the rendering much faster than before
+  - this also depreactes the usage of `bproc.renderer.set_samples()`, this is now replaced with `bproc.renderer.set_noise_threshold()`. This fcts allows to set the desired noise ration on a pixel basis, giving a much higher control to ensure a certain consistent noise level in the whole image. 
+  - it is still possible to limit the amount of samples per pixel with a new function named: `bproc.renderer.set_max_amount_of_samples()`
+  - as the whole image is now rendered at once we removed the auto-tile addon
+  - the BLENDER denoiser is no longer available, we recommend using the INTEL denoiser.
+- remove the argument `keep_using_base_color` from `bproc.lighting.light_surface()` and `Material.make_emissive()`, now either a emission color or the base color is used
+- changes for the bop integration
+  - install bop_toolkit automatically
+  - add BlenderProc2 python scripts for BOP challenge
+  - allow to pass list of objects to `write_bop` for which to save pose annotations
+  - divide `load_bop()` into `load_bop_objs()`, `load_bop_scene()` and `load_bop_intrinsics()` to decouple the functionalit
+- fix a bug after uninstalling pip packages they were not truly removed
+
+## Version 2.1.0 17th November 2021
 - add new lens distortion module, adding the possibility to simulate `k1, k2, k3, p1` and `p2` parameters. 
 - improve usability of distance rendering, make it the default in all examples
 - distance and depth rendering can now be done antialiased and non-antialiased

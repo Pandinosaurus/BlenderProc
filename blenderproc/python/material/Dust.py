@@ -1,11 +1,16 @@
+"""Provides the functionality to add a dust effect to a material."""
+
 import warnings
 from typing import List
-
-from blenderproc.python.types.MaterialUtility import Material
-import bpy
 import random
 
-def add_dust(material: Material, strength: float, texture_nodes: List[bpy.types.Texture] = None, texture_scale: float = 0.1):
+import bpy
+
+from blenderproc.python.types.MaterialUtility import Material
+
+
+def add_dust(material: Material, strength: float, texture_nodes: List[bpy.types.Texture] = None,
+             texture_scale: float = 0.1):
     """ Adds a dust film to the material, where the strength determines how much dust is used.
 
     This will be added right before the output of the material.
@@ -13,9 +18,10 @@ def add_dust(material: Material, strength: float, texture_nodes: List[bpy.types.
     :param material: Used material
     :param strength: This determines the strength of the dust, 0 means no dust 1.0 means full dust. Values above 1.0 are
                         possible, but create a thick film out of dust, which hides the material completely.
-    :param texture_nodes: If a specific dust texture should be used, this can be specified.  If this is empty a random noise texture is generated.
-    :param texture_scale: This scale is used to scale down the used noise texture (even for the case where a random noise texture
-                            is used).
+    :param texture_nodes: If a specific dust texture should be used, this can be specified.  If this is empty a random
+                          noise texture is generated.
+    :param texture_scale: This scale is used to scale down the used noise texture (even for the case where a random
+                          noise texture is used).
     """
 
     group_node = material.new_node("ShaderNodeGroup")
@@ -140,7 +146,7 @@ def add_dust(material: Material, strength: float, texture_nodes: List[bpy.types.
     # the used dust color is a grey with a tint in orange
     dust_color.inputs["Base Color"].default_value = [0.8, 0.773, 0.7, 1.0]
     dust_color.inputs["Roughness"].default_value = 1.0
-    dust_color.inputs["Specular"].default_value = 0.0
+    dust_color.inputs["Specular IOR Level"].default_value = 0.0
     links.new(dust_color.outputs["BSDF"], mix_shader.inputs[2])
 
     # create the input and output nodes inside of the group
@@ -150,10 +156,17 @@ def add_dust(material: Material, strength: float, texture_nodes: List[bpy.types.
     group_input.location = (x_pos + x_diff * 7, y_pos - y_diff * 0.5)
 
     # create sockets for the outside of the group match them to the mix shader
-    group.outputs.new(mix_shader.outputs[0].bl_idname, mix_shader.outputs[0].name)
-    group.inputs.new(mix_shader.inputs[1].bl_idname, mix_shader.inputs[1].name)
-    group.inputs.new(multiply_node.inputs[1].bl_idname, "Dust strength")
-    group.inputs.new(mapping_node.inputs["Scale"].bl_idname, "Texture scale")
+    group.interface.new_socket(
+        mix_shader.outputs[0].name, in_out='OUTPUT', socket_type=mix_shader.outputs[0].bl_idname)
+    group.interface.new_socket(
+        mix_shader.inputs[1].name, in_out='INPUT', socket_type=mix_shader.inputs[1].bl_idname)
+    group.interface.new_socket(
+        "Dust strength", in_out='INPUT', socket_type=multiply_node.inputs[1].bl_idname)
+    # We set the socket_type='NodeSocketVector' directly instead of using
+    # 'mapping.node.inputs["Scale"].bl_idname', because the 'Scale' has a specific bl_idname of
+    # 'NodeSocketVectorXYZ', but 'new_socket' expects 'NodeSocketVector'.
+    group.interface.new_socket(
+        "Texture scale", in_out='INPUT', socket_type='NodeSocketVector')
 
     # link the input and output to the mix shader
     links.new(group_input.outputs[0], mix_shader.inputs[1])

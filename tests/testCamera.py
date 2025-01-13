@@ -11,7 +11,7 @@ class UnitTestCheckCamera(unittest.TestCase):
     def test_camera_add_camera_pose(self):
         """ Tests if the camera to world matrix is set right.
         """
-        bproc.init()
+        bproc.clean_up(True)
 
         poi = np.array([0, 0, 0])
         #location = np.array([1, 2, 3])
@@ -45,5 +45,5 @@ class UnitTestCheckCamera(unittest.TestCase):
         calc_rotation_matrix = bproc.camera.rotation_from_forward_vec(poi - location, inplane_rot=rotation)
 
         for x, y in zip(np.reshape(correct_roation_matrix, -1).tolist(), np.reshape(calc_rotation_matrix, -1).tolist()):
-            self.assertAlmostEqual(x, y)
+            self.assertAlmostEqual(x, y, places=6)
 

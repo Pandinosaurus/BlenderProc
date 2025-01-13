@@ -1,5 +1,10 @@
+""" All default values are stored here. """
+
 
 class DefaultConfig:
+    """
+    All the default config values are specified in this class.
+    """
     # Camera
     resolution_x = 512
     resolution_y = 512
@@ -22,7 +27,8 @@ class DefaultConfig:
     color_depth = 8
     enable_transparency = False
     jpg_quality = 95
-    samples = 100
+    samples = 1024
+    sampling_noise_threshold = 0.01
     cpu_threads = 1
     denoiser = "INTEL"
     simplify_subdivision_render = 3
@@ -34,7 +40,15 @@ class DefaultConfig:
     transparency_bounces = 8
     volume_bounces = 0
     antialiasing_distance_max = 10000
+    world_background = [0.05, 0.05, 0.05]
+    view_transform = "Filmic"
+    look = None
+    exposure = 0.0
+    gamma = 1.0
 
     # Setup
-    default_pip_packages = ["wheel", "pyyaml==5.1.2", "imageio==2.9.0", "gitpython==3.1.18", "scikit-image==0.18.3", "pypng==0.0.20", "scipy==1.7.1",
-                            "matplotlib==3.4.3", "pytz==2021.1", "h5py==3.4.0", "Pillow==8.3.2", "opencv-contrib-python==4.5.3.56", "scikit-learn==0.24.2"]
+    default_pip_packages = ["wheel", "pyyaml==6.0.1", "imageio==2.34.1", "gitpython==3.1.43",
+                            "scikit-image==0.23.2", "pypng==0.20220715.0", "scipy==1.13.1", "matplotlib==3.9.0",
+                            "pytz==2024.1", "h5py==3.11.0", "Pillow==10.3.0", "opencv-contrib-python==4.10.0.82",
+                            "scikit-learn==1.5.0", "python-dateutil==2.9.0.post0", "rich==13.7.1", "trimesh==4.4.0",
+                            "pyrender==0.1.45"]
